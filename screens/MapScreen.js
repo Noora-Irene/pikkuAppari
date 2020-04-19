@@ -23,6 +23,7 @@ export default function MapScreen(props) {
       let location = await Location.getCurrentPositionAsync({});
       setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude});
     }
+    getAddress();
   };
 
   const getAddress= () => {
@@ -30,7 +31,11 @@ export default function MapScreen(props) {
       fetch(url)
       .then((response) => response.json())
       .then((responseJson) => {
-        setAddress(responseJson.results[0].locations[0].latLng);
+        setAddress({
+          latitude: responseJson.results[0].locations[0].latLng.lat,
+          longitude: responseJson.results[0].locations[0].latLng.lng
+        });
+        console.log(address);
         console.log(responseJson.results[0].locations[0].latLng);
       })
       .catch((error) => {
@@ -47,6 +52,10 @@ export default function MapScreen(props) {
           longitude: 24.9384,
           latitudeDelta: 0.4360,
           longitudeDelta: 0.4260,
+          }} 
+        region={{
+          latitude: address.latitude,
+          longitude: address.longitude
           }} >
           <Marker
             coordinate={{
@@ -56,10 +65,10 @@ export default function MapScreen(props) {
             pinColor='green'
             title='Sijaintini' 
           />
-           { address !== null ? <Marker
+           { address !== undefined && address !== null ? <Marker
             coordinate={{
-              latitude: address.lat,
-              longitude: address.lng 
+              latitude: address.latitude,
+              longitude: address.longitude 
             }}
             title= 'Haettu osoite'
             pinColor= 'yellow' 
@@ -72,10 +81,10 @@ export default function MapScreen(props) {
               title='Haaga-Helia'
             /> }
       </MapView>
-      <View style={styles.action}>
+     {/* <View style={styles.action}>
         <Button title="SHOW ADDRESS" onPress={getAddress} />
           <Text> {params.input} </Text>
-      </View>
+      </View>*/}
     </View>
   );
 }
