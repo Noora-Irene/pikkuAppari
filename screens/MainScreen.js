@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import { StatusBar, StyleSheet, View, FlatList } from 'react-native';
 import * as SQLite from 'expo-sqlite';
-import { ThemeProvider, Input, Button, ListItem, Overlay, Text } from 'react-native-elements';
+import { ThemeProvider, Input, Button, ListItem, Overlay, CheckBox } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const db = SQLite.openDatabase('servicetargets.db');
@@ -14,9 +14,13 @@ export default function MainScreen(props) {
   const [info, setInfo] = useState('');
   const [addressList, setOnList] = useState([]);
   const [visible, setVisible] = useState(false);
+  const [done, setDone] = useState(false);
 
   const openOverlay = () => {
     setVisible(!visible);
+  };
+  const markDone = () => {
+    setDone(!done)
   };
 
   useEffect(() => {
@@ -128,6 +132,7 @@ export default function MainScreen(props) {
                 onLongPress={() => deleteItem(item.id) }
                 rightTitle={item.zip}
                 rightSubtitle={item.pcs}
+                checkBox= { value={done}, checked={markDone} }
                 rightIcon= {{ type: 'font-awesome', name: 'angle-double-right' }} 
                 onPress={() => {
                     props.navigation.navigate({ routeName: 'Map',
