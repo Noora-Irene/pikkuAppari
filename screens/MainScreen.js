@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { StatusBar, StyleSheet, View, FlatList } from 'react-native';
+import { StatusBar, StyleSheet, View, FlatList, Picker } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import { ThemeProvider, Input, Button, ListItem, Overlay, CheckBox } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,9 +14,10 @@ export default function MainScreen(props) {
   const [info, setInfo] = useState('');
   const [addressList, setOnList] = useState([]);
   const [visible, setVisible] = useState(false);
+  
   const [done, setDone] = useState(false);
 
-  const openOverlay = () => {
+  const addToList = () => {
     setVisible(!visible);
   };
   const markDone = () => {
@@ -38,11 +39,8 @@ export default function MainScreen(props) {
   const input3 = text => {   
     setPcs(text);
   };
-  const input4 = text => {   
-    setInfo(text);
-  };
 
-  const addOnList = () => {
+  const addToDatabase = () => {
     db.transaction(tx => {
       tx.executeSql('insert into target (address, zip, pcs, info) values (?, ?, ?, ?);', [address, zip, pcs, info]);
     }, null, updateList
@@ -94,29 +92,50 @@ export default function MainScreen(props) {
                     }
                       iconRight
                       title="Lisää kohde"
-                      onPress={openOverlay}
+                      onPress={addToList}
                       />
-              <Overlay isVisible={visible} onBackdropPress={openOverlay}>
+                      <Button
+              icon={ <Icon
+                        name="pencil"
+                        size={25}
+                        color="white"
+                      />
+                    }
+                      iconRight
+                      title="Etsi osoite"
+                      onPress={() => {
+                        props.navigation.navigate({ routeName: 'Search'
+                        }) } }
+                      />
+              <Overlay isVisible={visible} onBackdropPress={addToList}>
                 <View style={styles.inputAreaOverlay}>
                   <Input placeholder= 'Katuosoite & paikkakunta' label='OSOITE' onChangeText={input1} value={address} 
                   />
-                  <Input placeholder= '' label='POSTINRO' onChangeText={input2} value={zip} 
+                  <Input placeholder= '' label='POSTINRO' keyboardType='numeric' onChangeText={input2} value={zip} 
                   />
-                  <Input placeholder= 'Laatikoiden lukumäärä' label='KPL' onChangeText={input3} value={pcs} 
+                  <Input placeholder= 'Laatikoiden lukumäärä' label='KPL' keyboardType='numeric' onChangeText={input3} value={pcs} 
                   />
-                  <Input placeholder= 'Lisätiedot kohteesta' label='INFO' onChangeText={input4} value={info} 
-                  />
-                     <Button
-                        icon={ <Icon
-                                  name="arrow-circle-o-right"
-                                  size={25}
-                                  color="white"
-                                />
-                              }
-                              iconRight
-                              title="Valmis"
-                              onPress={addOnList}
-                      />
+                    <Picker
+                      selectedValue={info}
+                      style={{ height: 80, width: '80%', color: 'grey' }}
+                      onValueChange={(itemValue, itemIndex) => 
+                        setInfo(itemValue)}
+                    >
+                      <Picker.Item label="Valitse koko" itemStyle={{color: 'grey'}}/> 
+                      <Picker.Item label="ISO" itemStyle={{color: 'grey'}} value="ISO" />
+                      <Picker.Item label="PIENI" value="PIENI" />
+                    </Picker>
+                      <Button
+                          icon={ <Icon
+                                    name="arrow-circle-o-right"
+                                    size={25}
+                                    color="white"
+                                  />
+                                }
+                                iconRight
+                                title="Valmis"
+                                onPress={addToDatabase}
+                        />
                 </View>
               </Overlay>
         </View>
@@ -126,20 +145,20 @@ export default function MainScreen(props) {
               keyExtractor={item => item.id.toString()}
               ItemSeparatorComponent={listSeparator}
               renderItem={ ({ item }) => 
-              <ListItem
-                title= {item.address}
-                subtitle={item.info}
-                onLongPress={() => deleteItem(item.id) }
-                rightTitle={item.zip}
-                rightSubtitle={item.pcs}
-                checkBox= { value={done}, checked={markDone} }
-                rightIcon= {{ type: 'font-awesome', name: 'angle-double-right' }} 
-                onPress={() => {
-                    props.navigation.navigate({ routeName: 'Map',
-                    params: {
-                        input: item.address
-                    }
-                    }) } }
+                <ListItem
+                  title= {item.address}
+                  subtitle={item.info}
+                  onLongPress={() => deleteItem(item.id) }
+                  rightTitle={item.zip}
+                  rightSubtitle={item.pcs}
+                  checkBox= { value={done}, checked={markDone} }
+                  rightIcon= {{ type: 'font-awesome', name: 'angle-double-right' }} 
+                  onPress={() => {
+                      props.navigation.navigate({ routeName: 'Map',
+                      params: {
+                          input: item.address
+                      }
+                      }) } }
                 /> }
             />
         </View>
@@ -172,6 +191,6 @@ const styles = StyleSheet.create({
     
   },
   listArea: {
-    flex: 4
+    flex: 3
   }
 });
