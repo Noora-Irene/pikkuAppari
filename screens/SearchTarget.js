@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Alert} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {StyleSheet, View, TouchableOpacity, Alert, Picker, Text} from 'react-native';
+import {Overlay, Input} from 'react-native-elements';
 import MapView, {Marker} from 'react-native-maps';
-import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
-import { ThemeProvider, Input, Button, Overlay, Picker } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import OwnLocation from '../components/OwnLocation';
+import * as firebase from 'firebase';
 
-export default function SearchTarget() {
+export default function SearchTarget(props) {
 
-  const [location, setLocation] = useState({latitude: 68.3188098, longitude: 24.8331068});
-  const [target, setTarget] = useState({latitude: 68.3188098, longitude: 24.8331068});
+  const [target, setTarget] = useState({ latitude: 60.1750, longitude: 24.9316});
   const [visible, setVisible] = useState(false);
   const [address, setAddress] = useState('');
   const [zip, setZip] = useState('');
   const [pcs, setPcs] = useState('');
   const [info, setInfo] = useState('');
 
+  const [addressList, setOnList] = useState([]);
+
   const input = text => {   
     setTarget(text);
-  };
-
-  const input1 = text => {   
     setAddress(text);
   };
   const input2 = text => {   
@@ -29,25 +26,13 @@ export default function SearchTarget() {
   const input3 = text => {   
     setPcs(text);
   };
-
  const addToList = () => {
   setVisible(!visible);
   };
 
   useEffect(() => {
-    getLocation();
-  }, []);
-
-  const getLocation = async () => {
-    let { status } =  await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== 'granted') {
-      Alert.alert('No permission to access location');
-    } else {
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude});
-    }
     getAddress();
-  };
+  }, []);
 
   const getAddress= () => {
     const url= 'http://www.mapquestapi.com/geocoding/v1/address?key=ko2vICghErBgA2Gp1yIqYBw6fZjfuhLK&location=' + target;
@@ -65,117 +50,170 @@ export default function SearchTarget() {
         Alert.alert('Error', error);
       });
   }
+  useEffect(() => {
+    firebase.database().ref('addressList/').on('value', snapshot => {
+      const data = snapshot.val();
+      const prods = Object.values(data);
+      setOnList(prods);
+    });
+  }, []);
+
+  saveItem = () => {
+    firebase.database().ref('addressList/').push(
+      {'address': address, 'zip': zip, 'pcs': pcs, 'info': info}
+    );
+    setZip('');
+    setPcs('');
+    setInfo('');
+  }
 
   return (
     <View style={styles.wholeScreen}>
       <Overlay isVisible={visible} onBackdropPress={addToList}>
-                <View style={styles.inputAreaOverlay}>
-                  <Input placeholder= 'Katuosoite & paikkakunta' label='OSOITE' onChangeText={input1} value={address} 
-                  />
-                  <Input placeholder= '' label='POSTINRO' keyboardType='numeric' onChangeText={input2} value={zip} 
-                  />
-                  <Input placeholder= 'Laatikoiden lukumäärä' label='KPL' keyboardType='numeric' onChangeText={input3} value={pcs} 
-                  />
-                {/*    <Picker
-                      selectedValue={info}
-                      style={{ height: 80, width: '80%', color: 'grey' }}
-                      onValueChange={(itemValue, itemIndex) => 
-                        setInfo(itemValue)}
-                    >
-                      <Picker.Item label="Valitse koko" itemStyle={{color: 'grey'}}/> 
-                      <Picker.Item label="ISO" itemStyle={{color: 'grey'}} value="ISO" />
-                      <Picker.Item label="PIENI" value="PIENI" />
-                      </Picker>*/}
-                      <Button
-                          icon={ <Icon
-                                    name="arrow-circle-o-right"
-                                    size={25}
-                                    color="white"
-                                  />
-                                }
-                                iconRight
-                                title="Valmis"
-                                //onPress={addToDatabase}
-                        />
-                </View>
-              </Overlay>
-      <MapView
-        style={{flex: 5}}
-        initialRegion= {{
-          latitude: 60.6399,
-          longitude: 26.1286,
-          latitudeDelta: 0.4360,
-          longitudeDelta: 0.4360,
-          }} 
-        region={{
-          latitude: target.latitude,
-          longitude: target.longitude,
-          latitudeDelta: 0.4360,
-          longitudeDelta: 0.4360,
-          }} >
-            <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude
+        <Input 
+          placeholder= 'Katuosoite & paikkakunta' 
+          label='OSOITE' 
+          value={address} 
+        />
+        <Input 
+          placeholder= '' 
+          label='POSTINRO' 
+          keyboardType='numeric' 
+          onChangeText={input2} 
+          value={zip} 
+          />
+        <Input 
+          placeholder= 'Laatikoiden lukumäärä'
+          label='KPL' 
+          keyboardType='numeric' 
+          onChangeText={input3} 
+          value={pcs} 
+        />
+          <Text
+            style={styles.pickerHeader} >
+            LAATIKON KOKO
+          </Text>
+            <Picker
+              style={{ height: 80, width: '80%', color: 'grey' }}
+              selectedValue={info}
+              onValueChange={(itemValue, itemIndex) => 
+                setInfo(itemValue)}
+            >
+              <Picker.Item 
+                label="Valitse" 
+                itemStyle={{color: 'grey'}}
+              /> 
+              <Picker.Item
+                label="ISO"
+                itemStyle={{color: 'grey'}}
+                value="ISO" 
+              />
+              <Picker.Item 
+                label="PIENI" 
+                value="PIENI"
+              />
+            </Picker>
+            <View style={styles.overlay}>
+              <TouchableOpacity style={styles.overlayButton} onPress={saveItem}>
+                <Text
+                  style={styles.buttonText}>
+                  Valmis
+                </Text>
+              </TouchableOpacity>
+            </View>
+      </Overlay>
+        <MapView
+          style={{flex: 7}}
+          initialRegion= {{
+            latitude: 60.1750, 
+            longitude: 24.9316,
+            latitudeDelta: 0.4360,
+            longitudeDelta: 0.4360,
             }} 
-            pinColor='blue'
-            title='Olet tässä' 
-          />
-          { target !== undefined && target !== null ?  <Marker
-            coordinate={{
-              latitude: target.latitude,
-              longitude: target.longitude 
-            }}
-            title=''
-            pinColor= 'yellow'
-            onPress={addToList}
-          /> :
-            <Marker
-              coordinate={{
-                latitude: 60.1750, 
-                longitude: 24.9316
-              }}
-              title='Kansallismuseo'
-            /> }
-      </MapView>
-      <ThemeProvider theme={theme}>
+          region={{
+            latitude: 60.1750, 
+            longitude: 24.9316,
+            latitudeDelta: 0.0322,
+            longitudeDelta: 0.0221
+            }} >
+              <OwnLocation navigation= {props.navigation} />
+              
+              { target !== undefined && target !== null ? 
+                <Marker
+                  coordinate={{
+                    latitude: target.latitude,
+                    longitude: target.longitude 
+                  }}
+                  title=''
+                  pinColor= 'blue'
+                  onPress={addToList}
+                /> :
+                <Marker
+                  coordinate={{
+                    latitude: 60.1750, 
+                    longitude: 24.9316
+                  }}
+                  title='Kansallismuseo'
+                /> }
+        </MapView>
         <View style={styles.action}>
-          <Input placeholder= 'Syötä katuosoite & paikkakunta' label='OSOITE' onChangeText={input} value={target} 
+          <Input
+            placeholder= 'Syötä katuosoite & paikkakunta'
+            label='OSOITE'
+            onChangeText={input} 
+            value={target} 
           />
-            <Button
-                icon={ <Icon
-                          name="arrow-circle-o-right"
-                          size={25}
-                          color="white"
-                        />
-                      }
-                      iconRight
-                      title="Hae osoite"
-                      onPress={getAddress}
-                      />
+            <TouchableOpacity style={styles.button} onPress={getAddress}>
+              <Text
+                style={styles.buttonText}>
+                Hae osoite
+              </Text>
+            </TouchableOpacity>
         </View>
-      </ThemeProvider>
     </View>
   );
 }
-SearchTarget.navigationOptions={
-  headerTitle: 'Etsi kohde'
-};
-const theme = {
-Button: {
-  containerStyle: {
-  marginVertical: 5
-  },
-  titleStyle: {
-    color: '#fffafa'
-  },
-},
-};
 const styles = StyleSheet.create({
  wholeScreen: {
     flex: 1
   },
   action: {
-    flex: 2
+    flex: 2,
+    alignItems: 'center'
   },
+  overlay: {
+    alignItems: 'center'
+  },
+  overlayButton: {
+    paddingVertical: 5,
+    alignItems: 'center',
+    backgroundColor: '#ff7f50',
+    borderColor: '#b22222',
+    borderWidth: 1,
+    borderRadius: 5,
+    width: 200
+  },
+  pickerHeader: {
+    marginLeft: 10,
+    marginTop: 10,
+    color: '#b22222',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  button: {
+    marginTop: 10,
+    marginBottom: 10,
+    paddingVertical: 5,
+    alignItems: 'center',
+    backgroundColor: '#ff7f50',
+    borderColor: '#b22222',
+    borderWidth: 1,
+    borderRadius: 5,
+    width: 200
+},
+  buttonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#fff8dc'
+}
 });
