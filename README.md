@@ -1,13 +1,14 @@
 # pikkuAppari
 
 Name of the app: littleHelper
+
 React Native map application using Firebase database // Mobile programming course practical work spring 20
 
 This app uses Mapview component, device location and Firebase database.
 
 The application allows a company to list an addresses of its service points as well as some information about the points. From each line of the list, the user has access to a map view, which shows the location of the address as well as the user's own location. The user sees all the service points on the map on a separate page (+ own location). There is also a page where user can search the address. Search result is shown as a marker on the map. User can add adress to the service point list by pressing the marker and adding information.
 
-![MainScreen](https://user-images.githubusercontent.com/43243679/128970596-05a94a26-4f49-40bb-a854-6213d7f31395.png)
+![MainScreen](https://user-images.githubusercontent.com/43243679/128971188-fda035b4-1491-42c2-8adf-859f3de0742e.png)
 
 ![MainScreenAddNewPoint](https://user-images.githubusercontent.com/43243679/128970617-555ec74d-ef8d-4a6e-9c3c-783cea12ef23.png)
 
