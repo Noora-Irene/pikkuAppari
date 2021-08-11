@@ -10,10 +10,11 @@ The application allows a company to list an addresses of its service points as w
 
 ![MainScreen](https://user-images.githubusercontent.com/43243679/128971188-fda035b4-1491-42c2-8adf-859f3de0742e.png)
 
-![MainScreenAddNewPoint](https://user-images.githubusercontent.com/43243679/128970617-555ec74d-ef8d-4a6e-9c3c-783cea12ef23.png)
+![MainScreenAddNewPoint](https://user-images.githubusercontent.com/43243679/128971837-37993181-f8d4-4963-beec-bbbd6ef33159.png)
 
-![SearchTarget](https://user-images.githubusercontent.com/43243679/128970632-e04e2e81-36c0-4bba-b658-bddf16fcd4eb.PNG)
+![SearchTarget](https://user-images.githubusercontent.com/43243679/128971863-94b2c6c0-4714-4982-9030-bc3e94b4b9f0.png)
 
-![SearchTargetOverlay](https://user-images.githubusercontent.com/43243679/128970646-479c6402-cf57-45b8-a86c-e3a4d1397ea3.PNG)
+![SearchTargetOverlay](https://user-images.githubusercontent.com/43243679/128971880-8e1c642f-8394-4836-9b5e-8a74fa6c2489.png)
 
-![AllTargets](https://user-images.githubusercontent.com/43243679/128970656-7fad4738-71e5-4788-92f4-ff5bef62f77d.PNG)
+![AllTargets](https://user-images.githubusercontent.com/43243679/128971906-0c870a74-87f4-4b31-ae5a-908caff30463.png)
+
